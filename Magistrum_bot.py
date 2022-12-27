@@ -129,6 +129,11 @@ def kid_age(m):
             markup.add(item6)
             item7=types.KeyboardButton("Scratch")
             markup.add(item7)
+            item8=types.KeyboardButton("Создание сайтов")
+            markup.add(item8)
+            item9=types.KeyboardButton("Разработка мобильных приложений")
+            markup.add(item9)
+
 
         elif information[1] >= 9:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -160,11 +165,6 @@ def kid_age(m):
             markup.add(item1)
             item2=types.KeyboardButton("Scratch")
             markup.add(item2)
-
-        elif information[1] >= 6:
-            markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            item1=types.KeyboardButton("")
-            markup.add(item1)
         
 
         answer = name_user + ', выберите, пожалуйста, направление занятий. Если в предложенных вариантах нет желаемого Вами направления, то уточните этот вопрос с администратором центра (контактные данные)'
