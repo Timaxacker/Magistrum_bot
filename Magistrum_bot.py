@@ -182,7 +182,7 @@ def vector(m):
 
     information.append(m.text.strip())
 
-    print(information)
+    print(information, "test")
     
 
 bot.polling(none_stop=True, interval=0) # Запуск бота 
