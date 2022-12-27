@@ -132,9 +132,9 @@ def kid_age(m):
 
         elif information[1] >= 9:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            item1=types.KeyboardButton("Программирование на Python")
+            item1=types.KeyboardButton("Разработка мобильных приложений")
             markup.add(item1)
-            item2=types.KeyboardButton("Геймдизайн")
+            item2=types.KeyboardButton("Геймдизайн (GoDot)")
             markup.add(item2)
             item3=types.KeyboardButton("Машинное обучение на Scratch")
             markup.add(item3)
@@ -144,15 +144,15 @@ def kid_age(m):
             markup.add(item5)
             item6=types.KeyboardButton("Scratch")
             markup.add(item6)
+            item7=types.KeyboardButton("Создание сайтов")
+            markup.add(item7)
 
         elif information[1] >= 8:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            item1=types.KeyboardButton("3D-моделирование")
+            item1=types.KeyboardButton("Робототехника Lego Mindstorms")
             markup.add(item1)
-            item2=types.KeyboardButton("Робототехника Lego Mindstorms")
+            item2=types.KeyboardButton("Scratch")
             markup.add(item2)
-            item3=types.KeyboardButton("Scratch")
-            markup.add(item3)
 
         elif information[1] >= 7:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -163,7 +163,7 @@ def kid_age(m):
 
         elif information[1] >= 6:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            item1=types.KeyboardButton("Scratch")
+            item1=types.KeyboardButton("")
             markup.add(item1)
         
 
@@ -182,7 +182,8 @@ def vector(m):
 
     information.append(m.text.strip())
 
-    print(information, "test")
+    answer = name_user + ", собранная информация поступит администратору и он перезвонит Вам. Для этого укажите, пожалуйста, номер телефона:"
+    bot.send_message(m.chat.id, answer)
     
 
 bot.polling(none_stop=True, interval=0) # Запуск бота 
