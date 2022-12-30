@@ -180,10 +180,27 @@ def kid_age(m):
 def vector(m):
     global answer, information
 
+    if m.text.strip() == "Scratch" or m.text.strip() == "Робототехника Lego Mindstorms" or m.text.strip() == "Создание сайтов" or m.text.strip() == "3D-моделирование" or m.text.strip() == "Машинное обучение на Scratch" or m.text.strip() == "Геймдизайн (GoDot)" or m.text.strip() == "Разработка мобильных приложений" or m.text.strip() == "Arduino" or m.text.strip() == "Робототехника Lego WeDo 2.0" or m.text.strip() == "Программирование на Python":
+        information.append(m.text.strip())
+        
+        answer = name_user + ", собранная информация поступит администратору и он перезвонит Вам. Для этого укажите, пожалуйста, номер телефона:"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, tel_number)
+    
+    else:
+        answer = "Нажимайте, пожалуйста, на кнопки, иначе я Вас не понимаю!"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, vector)
+
+
+def tel_number(m):
+    global answer, information
+
     information.append(m.text.strip())
 
-    answer = name_user + ", собранная информация поступит администратору и он перезвонит Вам. Для этого укажите, пожалуйста, номер телефона:"
+    answer =  name_user + ", как к Вам обращаться при звонке (имя, отчество)"
     bot.send_message(m.chat.id, answer)
-    
+
+
 
 bot.polling(none_stop=True, interval=0) # Запуск бота 
