@@ -17,9 +17,9 @@ from time import sleep as s
 # Определение переменных и списков
 answer = '' # Переменная для ответов
 channel = '@botTimalox'
-name_user = ''
 
-information = [] 
+name_user = ''
+name_user_bool = 0
 
 bot = telebot.TeleBot('5365169503:AAFFmQwmbkzjuCCLN1KSD1uCEBLI33xvGpk') # API ключ бота
 
@@ -38,7 +38,8 @@ def name_user_func(m):
     item1=types.KeyboardButton("Зарегистрироваться")
     markup.add(item1)
     
-    name_user = m.text.strip()
+    if name_user_bool == 0:
+        name_user = m.text.strip()
     
     answer = name_user + ', нажимайте на кнопки для дальнейших действий, иначе я Вас не пойму'
     bot.send_message(m.chat.id, answer, reply_markup=markup)
@@ -46,9 +47,11 @@ def name_user_func(m):
     
   
 def menu(m): # Функция для обработки основных кнопок 
-    global answer, channel
+    global answer, information
     
     if m.text.strip() == 'Зарегистрироваться':
+        information = [] 
+        
         answer = name_user + ', напишите, пожалуйста, фамилию и имя ребенка ребёнка'
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, kid_name)
@@ -200,6 +203,23 @@ def tel_number(m):
 
     answer =  name_user + ", как к Вам обращаться при звонке (имя, отчество)"
     bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, name_surname)
+
+
+def name_surname(m):
+    global answer, information, name_user_bool
+
+    information.append(m.text.strip())
+
+    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item1=types.KeyboardButton("Ок")
+    markup.add(item1)
+
+    answer = name_user + ", администратор перезвонит Вам, уточнит всю информацию, окончательно зарегистрирует ребенка и даст дальнейшие указания"
+    bot.send_message(m.chat.id, answer, reply_markup=markup)
+    name_user_bool = 1
+    print(information)
+    bot.register_next_step_handler(m, name_user_func)
 
 
 
