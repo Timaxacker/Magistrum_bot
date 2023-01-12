@@ -18,30 +18,30 @@ from time import sleep as s
 answer = '' # Переменная для ответов
 channel = '@botTimalox'
 
-name_user = ''
-name_user_bool = 0
+information = {}
 
 bot = telebot.TeleBot('5365169503:AAFFmQwmbkzjuCCLN1KSD1uCEBLI33xvGpk') # API ключ бота
 
-    
+
 
 @bot.message_handler(commands=["start"]) # Команда для запуска бота 
 def start(m, res=False): # Функция срабатывающая при старте   
     bot.send_message(m.chat.id, 'Вас приветствует Telegram бот детского роботехнического клуба "Магиструм"! Как к Вам обращаться?') # Фраза встречающая пользователя после комманды /start
 
+    information[m.from_user.id] = []
 
 @bot.message_handler(content_types=["text"]) # Команда для получения текста 
 def name_user_func(m):
-    global answer, name_user
+    global answer, information
     
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     item1=types.KeyboardButton("Зарегистрироваться")
     markup.add(item1)
     
-    if name_user_bool == 0:
-        name_user = m.text.strip()
+    if len(information[m.from_user.id]) == 0:
+        information[m.from_user.id].append(m.text.strip())
     
-    answer = name_user + ', нажимайте на кнопки для дальнейших действий, иначе я Вас не пойму'
+    answer = information[m.from_user.id][0] + ', нажимайте на кнопки для дальнейших действий, иначе я Вас не пойму'
     bot.send_message(m.chat.id, answer, reply_markup=markup)
     bot.register_next_step_handler(m, menu)
     
@@ -50,9 +50,7 @@ def menu(m): # Функция для обработки основных кно�
     global answer, information
     
     if m.text.strip() == 'Зарегистрироваться':
-        information = [] 
-        
-        answer = name_user + ', напишите, пожалуйста, фамилию и имя ребенка ребёнка'
+        answer = information[m.from_user.id][0] + ', напишите, пожалуйста, фамилию и имя ребенка ребёнка'
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, kid_name)
         
@@ -65,7 +63,7 @@ def menu(m): # Функция для обработки основных кно�
 def kid_name(m):
     global answer, information
     
-    information.append(m.text.strip())
+    information[m.from_user.id].append(m.text.strip())
 
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     item1=types.KeyboardButton("4")
@@ -96,11 +94,11 @@ def kid_name(m):
     markup.add(item13)
     item14=types.KeyboardButton("17")
     markup.add(item14)
-    item15=types.KeyboardButton("18 и более")
+    item15=types.KeyboardButton("18+")
     markup.add(item15)
     
 
-    answer = name_user + ', выберите, пожалуйста, возраст ребёнка'
+    answer = information[m.from_user.id][0] + ', выберите, пожалуйста, возраст ребёнка'
     bot.send_message(m.chat.id, answer, reply_markup=markup)
     bot.register_next_step_handler(m, kid_age)
 
@@ -108,15 +106,15 @@ def kid_name(m):
 def kid_age(m):
     global answer, information
     
-    if m.text.strip() == '4' or m.text.strip() == '5' or m.text.strip() == '6' or m.text.strip() == '7' or m.text.strip() == '8' or m.text.strip() == '9' or m.text.strip() == '10' or m.text.strip() == '11' or m.text.strip() == '12' or m.text.strip() == '13' or m.text.strip() == '14' or m.text.strip() == '15' or m.text.strip() == '16' or m.text.strip() == '17' or m.text.strip() == '18 и более':
-        information.append(int(m.text.strip()))
+    if m.text.strip() == '4' or m.text.strip() == '5' or m.text.strip() == '6' or m.text.strip() == '7' or m.text.strip() == '8' or m.text.strip() == '9' or m.text.strip() == '10' or m.text.strip() == '11' or m.text.strip() == '12' or m.text.strip() == '13' or m.text.strip() == '14' or m.text.strip() == '15' or m.text.strip() == '16' or m.text.strip() == '17' or m.text.strip() == '18+':
+        information[m.from_user.id].append(int(m.text.strip()))
         
-        if information[1] <= 6:
+        if information[m.from_user.id][2] <= 6:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1=types.KeyboardButton("Робототехника Lego WeDo 2.0")
             markup.add(item1)
 
-        elif information[1] >= 10:
+        elif information[m.from_user.id][2] >= 10:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1=types.KeyboardButton("Arduino")
             markup.add(item1)
@@ -138,7 +136,7 @@ def kid_age(m):
             markup.add(item9)
 
 
-        elif information[1] >= 9:
+        elif information[m.from_user.id][2] >= 9:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1=types.KeyboardButton("Разработка мобильных приложений")
             markup.add(item1)
@@ -155,14 +153,8 @@ def kid_age(m):
             item7=types.KeyboardButton("Создание сайтов")
             markup.add(item7)
 
-        elif information[1] >= 8:
-            markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            item1=types.KeyboardButton("Робототехника Lego Mindstorms")
-            markup.add(item1)
-            item2=types.KeyboardButton("Scratch")
-            markup.add(item2)
 
-        elif information[1] >= 7:
+        elif information[m.from_user.id][2] >= 7:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1=types.KeyboardButton("Робототехника Lego Mindstorms")
             markup.add(item1)
@@ -170,7 +162,7 @@ def kid_age(m):
             markup.add(item2)
         
 
-        answer = name_user + ', выберите, пожалуйста, направление занятий. Если в предложенных вариантах нет желаемого Вами направления, то уточните этот вопрос с администратором центра (контактные данные)'
+        answer = information[m.from_user.id][0] + ', выберите, пожалуйста, направление занятий. Если в предложенных вариантах нет желаемого Вами направления, то уточните этот вопрос с администратором центра (контактные данные)'
         bot.send_message(m.chat.id, answer, reply_markup=markup)
         bot.register_next_step_handler(m, vector)
         
@@ -184,9 +176,9 @@ def vector(m):
     global answer, information
 
     if m.text.strip() == "Scratch" or m.text.strip() == "Робототехника Lego Mindstorms" or m.text.strip() == "Создание сайтов" or m.text.strip() == "3D-моделирование" or m.text.strip() == "Машинное обучение на Scratch" or m.text.strip() == "Геймдизайн (GoDot)" or m.text.strip() == "Разработка мобильных приложений" or m.text.strip() == "Arduino" or m.text.strip() == "Робототехника Lego WeDo 2.0" or m.text.strip() == "Программирование на Python":
-        information.append(m.text.strip())
+        information[m.from_user.id].append(m.text.strip())
         
-        answer = name_user + ", собранная информация поступит администратору и он перезвонит Вам. Для этого укажите, пожалуйста, номер телефона:"
+        answer = information[m.from_user.id][0] + ", собранная информация поступит администратору и он перезвонит Вам. Для этого укажите, пожалуйста, номер телефона:"
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, tel_number)
     
@@ -199,27 +191,28 @@ def vector(m):
 def tel_number(m):
     global answer, information
 
-    information.append(m.text.strip())
+    information[m.from_user.id].append(m.text.strip())
 
-    answer =  name_user + ", как к Вам обращаться при звонке (имя, отчество)"
+    answer =  information[m.from_user.id][0] + ", как к Вам обращаться при звонке (имя, отчество)"
     bot.send_message(m.chat.id, answer)
     bot.register_next_step_handler(m, name_surname)
 
 
 def name_surname(m):
-    global answer, information, name_user_bool
+    global answer, information
 
-    information.append(m.text.strip())
+    information[m.from_user.id].append(m.text.strip())
 
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     item1=types.KeyboardButton("Ок")
     markup.add(item1)
 
-    answer = name_user + ", администратор перезвонит Вам, уточнит всю информацию, окончательно зарегистрирует ребенка и даст дальнейшие указания"
+    answer = information[m.from_user.id][0] + ", администратор перезвонит Вам, уточнит всю информацию, окончательно зарегистрирует ребенка и даст дальнейшие указания"
     bot.send_message(m.chat.id, answer, reply_markup=markup)
-    name_user_bool = 1
+    
     print(information)
     bot.register_next_step_handler(m, name_user_func)
+
 
 
 
