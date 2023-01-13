@@ -17,6 +17,7 @@ from time import sleep as s
 # Определение переменных и списков
 answer = '' # Переменная для ответов
 channel = '@botTimalox'
+name_user_bool = False
 
 information = {}
 
@@ -38,7 +39,7 @@ def name_user_func(m):
     item1=types.KeyboardButton("Зарегистрироваться")
     markup.add(item1)
     
-    if len(information[m.from_user.id]) == 0:
+    if name_user_bool == False:
         information[m.from_user.id].append(m.text.strip())
     
     answer = information[m.from_user.id][0] + ', нажимайте на кнопки для дальнейших действий, иначе я Вас не пойму'
@@ -199,7 +200,7 @@ def tel_number(m):
 
 
 def name_surname(m):
-    global answer, information
+    global answer, information, name_user_bool
 
     information[m.from_user.id].append(m.text.strip())
 
@@ -210,7 +211,12 @@ def name_surname(m):
     answer = information[m.from_user.id][0] + ", администратор перезвонит Вам, уточнит всю информацию, окончательно зарегистрирует ребенка и даст дальнейшие указания"
     bot.send_message(m.chat.id, answer, reply_markup=markup)
     
-    print(information)
+    answer = str(information[m.from_user.id])
+    bot.send_message(1835294966, answer, reply_markup=markup)
+    
+    information[m.from_user.id] = [information[m.from_user.id][0]]
+    name_user_bool = True
+
     bot.register_next_step_handler(m, name_user_func)
 
 
