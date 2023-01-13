@@ -21,6 +21,9 @@ name_user_bool = False
 
 information = {}
 
+list_of_vectors0 = ("https://magistrumclub.ru\n\nРобототехника Lego WeDo 2.0:\nmagistrumclub.ru/wedo\n\nScratch:\nmagistrumclub.ru/scratch\n\nРобототехника Lego Mindstorms:\nmagistrumclub.ru/legoev3\n\nСоздание сайтов:\nнет ссылка\n\n3D-моделирование:\nmagistrumclub.ru/3d-model\n\nМашинное обучение на Scratch:\nmagistrumclub.ru/machine\n\nГеймдизайн (GoDot):\nmagistrumclub.ru/godot\n\n")
+list_of_vectors1 = ("Программирование на Python:\nmagistrumclub.ru/python\n\nArduino:\nmagistrumclub.ru/arduino")
+
 bot = telebot.TeleBot('5365169503:AAFFmQwmbkzjuCCLN1KSD1uCEBLI33xvGpk') # API ключ бота
 
 
@@ -38,6 +41,8 @@ def name_user_func(m):
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     item1=types.KeyboardButton("Зарегистрироваться")
     markup.add(item1)
+    item2=types.KeyboardButton("Список направлений")
+    markup.add(item2)
     
     if name_user_bool == False:
         information[m.from_user.id].append(m.text.strip())
@@ -61,6 +66,13 @@ def menu(m): # Функция для обработки основных кно�
         bot.send_message(m.chat.id, answer, reply_markup=markup)
         bot.register_next_step_handler(m, warning)
 
+    elif m.text.strip() == 'Список направлений':
+        answer = list_of_vectors0 + list_of_vectors1
+        bot.send_message(m.chat.id, answer)
+
+        answer = "Если Вы не знаете как выбрать направление, то мы пможем: magistrumclub.ru/how"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, menu)
 
     else:
         answer = "Нажимайте, пожалуйста, на кнопки, иначе я Вас не понимаю!"
@@ -72,8 +84,9 @@ def warning(m):
     global answer
 
     if m.text.strip() == 'Посмотреть спиок направлений':
-        answer = "<<Список направлений>>"
+        answer = list_of_vectors0 + list_of_vectors1
         bot.send_message(m.chat.id, answer)
+
 
     answer = information[m.from_user.id][0] + ', напишите, пожалуйста, фамилию и имя ребенка ребёнка'
     bot.send_message(m.chat.id, answer)
