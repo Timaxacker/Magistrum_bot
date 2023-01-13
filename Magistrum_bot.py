@@ -51,14 +51,33 @@ def menu(m): # Функция для обработки основных кно�
     global answer, information
     
     if m.text.strip() == 'Зарегистрироваться':
-        answer = information[m.from_user.id][0] + ', напишите, пожалуйста, фамилию и имя ребенка ребёнка'
-        bot.send_message(m.chat.id, answer)
-        bot.register_next_step_handler(m, kid_name)
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1=types.KeyboardButton("Посмотреть спиок направлений")
+        markup.add(item1)
+        item2=types.KeyboardButton("Я знаю нужное мне направление")
+        markup.add(item2)
         
+        answer = "У нас в клубе много разных направлений и перед регистрацией мы советуем Вам посмотреть спиок"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, warning)
+
+
     else:
         answer = "Нажимайте, пожалуйста, на кнопки, иначе я Вас не понимаю!"
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, menu)
+
+
+def warning(m):
+    global answer
+
+    if m.text.strip() == 'Посмотреть спиок направлений':
+        answer = "<<Список направлений>>"
+        bot.send_message(m.chat.id, answer)
+
+    answer = information[m.from_user.id][0] + ', напишите, пожалуйста, фамилию и имя ребенка ребёнка'
+    bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, kid_name)
 
 
 def kid_name(m):
@@ -194,7 +213,7 @@ def tel_number(m):
 
     information[m.from_user.id].append(m.text.strip())
 
-    answer =  information[m.from_user.id][0] + ", как к Вам обращаться при звонке (имя, отчество)"
+    answer =  information[m.from_user.id][0] + ", как к Вам обращаться при звонке? (имя, отчество)"
     bot.send_message(m.chat.id, answer)
     bot.register_next_step_handler(m, name_surname)
 
