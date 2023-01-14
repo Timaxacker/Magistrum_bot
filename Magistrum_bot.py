@@ -24,6 +24,8 @@ information = {}
 list_of_vectors0 = ("https://magistrumclub.ru\n\nРобототехника Lego WeDo 2.0:\nmagistrumclub.ru/wedo\n\nScratch:\nmagistrumclub.ru/scratch\n\nРобототехника Lego Mindstorms:\nmagistrumclub.ru/legoev3\n\nСоздание сайтов:\nнет ссылка\n\n3D-моделирование:\nmagistrumclub.ru/3d-model\n\nМашинное обучение на Scratch:\nmagistrumclub.ru/machine\n\nГеймдизайн (GoDot):\nmagistrumclub.ru/godot\n\n")
 list_of_vectors1 = ("Программирование на Python:\nmagistrumclub.ru/python\n\nArduino:\nmagistrumclub.ru/arduino")
 
+list_of_affiliates0 = ("Карта с филиалами\nhttps://magistrumclub.ru/#contacts\n\nУл.Композиторов, д. 12 лит. Б (Головной центр Магиструм)\n+7 (911) 927-77-06\nmagistrumclub.ru/magistrum\n\nпр. Просвещения, д. 99\n+7 (911) 924-36-04\nmagistrumclub.ru/infinitiv\n\nул. Нахимова, д. 11\n+7 (981) 111-33-22\nmagistrumclub.ru/menar-ch\n\nул. Васенко, д. 12\n+7 (981) 249-89-97\nmagistrumclub.ru/nova\n\nул. Смоленская, д 14\n+7 (911) 916-42-10\nmagistrumclub.ru/infinitive2\n\nПр-т Королева, д. 59к2\n+7 (999) 232-26-45\nmagistrumclub.ru/centrpritazeniya\n\nул. Республиканская, д. 35\n(запись на занятия через головной центр Магиструма)\n+7 (911) 927-77-06\nmagistrumclub.ru/respublikanskaya\n\nКонстантиновский пр-т., д. 23\n+7 (911) 925-95-05\nmagistrumclub.ru/lfkrestovsky\n\nСоветская ул., 31, посёлок Песочный\n+7 (981) 335-64-93\nmagistrumclub.ru/detskayaakademianauk\n\nУл. Тельмана, 48, корп. 2\nГде телефон?\nmagistrumclub.ru/nevskogoschool\n\nУлица Дыбенко 8к2\n+7 (921) 876-73-06\nmagistrumclub.ru/kidstory")
+
 bot = telebot.TeleBot('5365169503:AAFFmQwmbkzjuCCLN1KSD1uCEBLI33xvGpk') # API ключ бота
 
 
@@ -43,6 +45,8 @@ def name_user_func(m):
     markup.add(item1)
     item2=types.KeyboardButton("Список направлений")
     markup.add(item2)
+    item3=types.KeyboardButton("Список филиалов")
+    markup.add(item3)
     
     if name_user_bool == False:
         information[m.from_user.id].append(m.text.strip())
@@ -71,6 +75,11 @@ def menu(m): # Функция для обработки основных кно�
         bot.send_message(m.chat.id, answer)
 
         answer = "Если Вы не знаете как выбрать направление, то мы пможем: magistrumclub.ru/how"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, menu)
+
+    elif m.text.strip() == 'Список филиалов':
+        answer = list_of_affiliates0
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, menu)
 
