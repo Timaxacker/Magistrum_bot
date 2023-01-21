@@ -246,9 +246,45 @@ def name_surname(m):
 
     information[m.from_user.id].append(m.text.strip())
 
-    #markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-    #item1=types.KeyboardButton("Ок")
-    #markup.add(item1)
+    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item1=types.KeyboardButton("Отлично (5)")
+    markup.add(item1)
+    item2=types.KeyboardButton("Хорошо (4)")
+    markup.add(item2)
+    item3=types.KeyboardButton("Удовлетворительно (3)")
+    markup.add(item3)
+    item4=types.KeyboardButton("Неудовлетворительно (2)")
+    markup.add(item4)
+    item5=types.KeyboardButton("Плохо (1)")
+    markup.add(item5)
+    
+    answer = information[m.from_user.id][1] + ", администратор перезвонит Вам, уточнит всю информацию, окончательно зарегистрирует ребенка и даст дальнейшие указания"
+    bot.send_message(m.chat.id, answer)
+    
+    answer = information[m.from_user.id][1] + ", оцените, пожалуйста, работу бота"
+    bot.send_message(m.chat.id, answer, reply_markup=markup)
+    
+    answer = str(information[m.from_user.id])
+    bot.send_message(1835294966, answer)
+    bot.register_next_step_handler(m, mark)
+    
+    
+def mark(m):
+    global answer, information
+    
+    information[m.from_user.id].append(m.text.strip())
+    
+    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item1=types.KeyboardButton("Не хочу комментировать")
+    markup.add(item1)
+    
+    answer = information[m.from_user.id][1] + ", прокомментируйте, пожалуйста, что вам понравилось/не понравилось в работе бота"
+    bot.send_message(m.chat.id, answer, reply_markup=markup)
+    bot.register_next_step_handler(m, comment)
+    
+    
+def comment(m):
+    global answer, information
     
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     item1=types.KeyboardButton("Зарегистрироваться")
@@ -257,21 +293,19 @@ def name_surname(m):
     markup.add(item2)
     item3=types.KeyboardButton("Список филиалов")
     markup.add(item3)
-
-    answer = information[m.from_user.id][1] + ", администратор перезвонит Вам, уточнит всю информацию, окончательно зарегистрирует ребенка и даст дальнейшие указания"
+    
+    if m.text.strip() != "Не хочу комментировать":
+        information[m.from_user.id].append(m.text.strip())
+    
+    answer = information[m.from_user.id][1] + ", спасибо за ваш отзыв!"
     bot.send_message(m.chat.id, answer, reply_markup=markup)
     
-    answer = str(information[m.from_user.id])
-    bot.send_message(1835294966, answer, reply_markup=markup)
     
     information[m.from_user.id][0] = True
     information[m.from_user.id] = [information[m.from_user.id][0], information[m.from_user.id][1]]
     print([information[m.from_user.id][0], information[m.from_user.id][1]])
-    
-
     bot.register_next_step_handler(m, menu)
-
-
+    
 
 
 bot.polling(none_stop=True, interval=0) # Запуск бота 
