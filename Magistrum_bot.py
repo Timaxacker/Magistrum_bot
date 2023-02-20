@@ -27,14 +27,23 @@ list_of_vectors1 = ("- Программирование на Python\n- Arduino\n
 list_of_affiliates0 = ("Карта с филиалами\nhttps://magistrumclub.ru/#contacts\n\nУл.Композиторов, д. 12 лит. Б (Головной центр Магиструм)\n+7 (911) 927-77-06\nmagistrumclub.ru/magistrum\n\nпр. Просвещения, д. 99\n+7 (911) 924-36-04\nmagistrumclub.ru/infinitiv\n\nул. Нахимова, д. 11\n+7 (981) 111-33-22\nmagistrumclub.ru/menar-ch\n\nул. Васенко, д. 12\n+7 (981) 249-89-97\nmagistrumclub.ru/nova\n\nул. Смоленская, д 14\n+7 (911) 916-42-10\nmagistrumclub.ru/infinitive2\n\nПр-т Королева, д. 59к2\n+7 (999) 232-26-45\nmagistrumclub.ru/centrpritazeniya\n\nул. Республиканская, д. 35\n(запись на занятия через головной центр Магиструма)\n+7 (911) 927-77-06\nmagistrumclub.ru/respublikanskaya\n\nКонстантиновский пр-т., д. 23\n+7 (911) 925-95-05\nmagistrumclub.ru/lfkrestovsky\n\nСоветская ул., 31, посёлок Песочный\n+7 (981) 335-64-93\nmagistrumclub.ru/detskayaakademianauk\n\nУл. Тельмана, 48, корп. 2\nГде телефон?\nmagistrumclub.ru/nevskogoschool\n\nУлица Дыбенко 8к2\n+7 (921) 876-73-06\nmagistrumclub.ru/kidstory")
 
 bot = telebot.TeleBot('5365169503:AAFFmQwmbkzjuCCLN1KSD1uCEBLI33xvGpk') # API ключ бота
+keyboard = types.InlineKeyboardMarkup() # Переменная для inline кнопок
 
 
 
 @bot.message_handler(commands=["start"]) # Команда для запуска бота 
 def start(m, res=False): # Функция срабатывающая при старте   
-    bot.send_message(m.chat.id, 'Вас приветствует Telegram бот детского роботехнического клуба "Магиструм"! Как к Вам обращаться?') # Фраза встречающая пользователя после комманды /start
+    global answer
 
     information[m.from_user.id] = [False]
+
+    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    key_inter1 = types.InlineKeyboardButton(text= 'Помощь в выборе', callback_data='help')
+    keyboard.add(key_inter1)
+
+    answer = 'Вас приветствует Telegram бот детского роботехнического клуба "Магиструм"! Как к Вам обращаться?'
+    bot.send_message(m.chat.id, answer, reply_markup=markup) # Фраза встречающая пользователя после комманды /start
+
 
 @bot.message_handler(content_types=["text"]) # Команда для получения текста 
 def name_user_func(m):
@@ -75,7 +84,9 @@ def menu(m): # Функция для обработки основных кно�
         answer = list_of_vectors0 + list_of_vectors1
         bot.send_message(m.chat.id, answer)
 
-        answer = "Если Вы не знаете как выбрать направление, то мы пможем: magistrumclub.ru/how"
+        key_inter1 = types.InlineKeyboardButton(text= 'Помощь в выборе', callback_data='help')
+
+        answer = "Если Вы не знаете как выбрать направление, то мы поможем"
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, menu)
 
@@ -306,6 +317,29 @@ def comment(m):
     print([information[m.from_user.id][0], information[m.from_user.id][1]])
     bot.register_next_step_handler(m, menu)
     
+
+
+@bot.callback_query_handler(func=lambda call: True) # Команда обработки инлайн кнопок 
+def callback_worker(call): # Функция по обработки инлайн кнопок 
+    global answer
+
+    if call.data == "help":
+        answer = information[call.from_user.id][1] + ", пройдите тест, и результат покажет какие напрвавления Вам подойдут"
+        bot.send_message(call.chat.id, answer)
+
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1=types.KeyboardButton("Да")
+        markup.add(item1)
+        item1=types.KeyboardButton("Нет")
+        markup.add(item1)
+
+        answer = information[call.from_user.id][1] + ", Ваш ребенок ходит в школу?"
+        bot.send_message(call.chat.id, answer)
+        #bot.register_next_step_handler(call, shool)
+
+
+
+
 
 
 bot.polling(none_stop=True, interval=0) # Запуск бота 
