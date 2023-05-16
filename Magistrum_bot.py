@@ -38,8 +38,8 @@ def start(m, res=False): # Функция срабатывающая при ст
     information[m.from_user.id] = [False]
 
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-    key_inter1 = types.InlineKeyboardButton(text= 'Помощь в выборе', callback_data='help')
-    keyboard.add(key_inter1)
+    help = types.InlineKeyboardButton(text= 'Помощь в выборе', callback_data='help')
+    keyboard.add(help)
 
     answer = 'Вас приветствует Telegram бот детского роботехнического клуба "Магиструм"! Как к Вам обращаться?'
     bot.send_message(m.chat.id, answer, reply_markup=markup) # Фраза встречающая пользователя после комманды /start
@@ -67,7 +67,7 @@ def name_user_func(m):
     
   
 def menu(m): # Функция для обработки основных кнопок 
-    global answer, information
+    global answer, information, keyboard, markup
     
     if m.text.strip() == 'Зарегистрироваться':
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -84,10 +84,10 @@ def menu(m): # Функция для обработки основных кно�
         answer = list_of_vectors0 + list_of_vectors1
         bot.send_message(m.chat.id, answer)
 
-        key_inter1 = types.InlineKeyboardButton(text= 'Помощь в выборе', callback_data='help')
+        help = types.InlineKeyboardButton(text= 'Помощь в выборе', callback_data='help')
 
         answer = "Если Вы не знаете как выбрать направление, то мы поможем"
-        bot.send_message(m.chat.id, answer)
+        bot.send_message(m.chat.id, answer, reply_markup=keyboard)
         bot.register_next_step_handler(m, menu)
 
     elif m.text.strip() == 'Список филиалов':
@@ -275,7 +275,7 @@ def name_surname(m):
     answer = information[m.from_user.id][1] + ", оцените, пожалуйста, работу бота"
     bot.send_message(m.chat.id, answer, reply_markup=markup)
     
-    answer = str(information[m.from_user.id])
+    answer =    (information[m.from_user.id])
     bot.send_message(1835294966, answer)
     bot.register_next_step_handler(m, mark)
     
@@ -325,7 +325,7 @@ def callback_worker(call): # Функция по обработки инлайн
 
     if call.data == "help":
         answer = information[call.from_user.id][1] + ", пройдите тест, и результат покажет какие напрвавления Вам подойдут"
-        bot.send_message(call.chat.id, answer)
+        bot.send_message(call.message.chat.id, answer)
 
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1=types.KeyboardButton("Да")
@@ -334,7 +334,7 @@ def callback_worker(call): # Функция по обработки инлайн
         markup.add(item1)
 
         answer = information[call.from_user.id][1] + ", Ваш ребенок ходит в школу?"
-        bot.send_message(call.chat.id, answer)
+        bot.send_message(call.message.chat.id, answer)
         #bot.register_next_step_handler(call, shool)
 
 

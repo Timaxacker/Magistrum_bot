@@ -5,4 +5,4 @@
 - В разработке
 --------
 # Ник в Telegram:
-> @Magistrum_bot
+> [@Magistrum_bot](https://t.me/Magistrum_bot)
