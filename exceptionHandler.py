@@ -145,7 +145,10 @@ def printerror(e):
         if i == len(errorTextP) - 1:
             errorText += errorTextP[i]
             break
+        if errorTextP[i] == "Traceback (most recent call last):\n":
+            continue
         text = errorTextP[i].split("\n")[0]
+        # print(errorTextP[i])
         if text.split("\"")[1][-19:] == "exceptionHandler.py" and text[-7:] == "wrapper":
             continue
         errorText += errorTextP[i]
@@ -155,11 +158,12 @@ def printerror(e):
 
 
 def send_error(text):
-    for id_tg in eval(open('Admins-ID.txt', 'r').read()):
-        try:
-            bot.send_message(id_tg, text)
-        except:
-            pass
+    with open('Admins-ID.txt', 'r') as f:
+        for id_tg in f.read().split("\n"):
+            try:
+                bot.send_message(int(id_tg), text)
+            except:
+                pass
 
 
 if __name__ == "__main__":
