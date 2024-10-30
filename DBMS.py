@@ -55,15 +55,15 @@ def add_information_in_table(connection, info):
 
 
 
-delete = "DROP TABLE"
+delete = "DROP TABLE lessons"
 
 
 create_lessons_table = """
 CREATE TABLE IF NOT EXISTS lessons (
   id INTEGER PRIMARY KEY,
   day_of_week TEXT,
-  time_begin TEXT,
-  time_end TEXT,
+  time_begin INTEGER,
+  time_end INTEGER,
   teacher_id INTEGER,
   area_id INTEGER,
   lesson_id INTEGER,
@@ -138,4 +138,65 @@ CREATE TABLE IF NOT EXISTS comments (
   FOREIGN KEY (lesson_id) REFERENCES lessons(id),
   FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
+"""
+
+
+addition_lessons = """
+INSERT INTO
+  lessons (id, day_of_week, time_begin, time_end, teacher_id, area_id, lesson_id)
+VALUES
+  (0, 'mon', 1200, 1330, 1835294966, 0, 0),
+  (1, 'mon', 1400, 1500, 1835294966, 0, 1),
+  (2, 'wed', 1815, 1945, 1835294966, 0, 0)
+"""
+
+
+addition_teachers = """
+INSERT INTO
+  teachers (id, lastname, name, patronymic, tg_nick, teacher_state_id)
+VALUES
+  (1835294966, "Лазарев", "Тимофей", "Максимович", "Timahacker", 1)
+"""
+
+
+addition_areas = """
+INSERT INTO
+  areas (id, title, adres, area_state_id)
+VALUES
+  (0, "Магиструм", "Композиторов 12", 1)
+"""
+
+
+addition_type_lesson = """
+INSERT INTO
+  type_lesson (id, title)
+VALUES
+  (0, "Python"),
+  (1, "WeDo")
+"""
+
+
+addition_state_teacher = """
+INSERT INTO
+  state_teacher (id, state)
+VALUES
+  (0, 0),
+  (1, 1)
+"""
+
+
+addition_state_area = """
+INSERT INTO
+  state_area (id, state)
+VALUES
+  (0, 0),
+  (1, 1)
+"""
+
+
+addition_comment =  """
+INSERT INTO
+  comments (id, date, lesson_id, comment, teacher_id, info, active)
+VALUES
+  (0, 06112024, 2, "Заболел", 1835294966, "Дети - цветы жизни!", 1)
 """
