@@ -61,7 +61,7 @@ delete = "DROP TABLE lessons"
 create_lessons_table = """
 CREATE TABLE IF NOT EXISTS lessons (
   id INTEGER PRIMARY KEY,
-  day_of_week TEXT,
+  day_of_week INTEGER,
   time_begin INTEGER,
   time_end INTEGER,
   teacher_id INTEGER,
@@ -145,9 +145,9 @@ addition_lessons = """
 INSERT INTO
   lessons (id, day_of_week, time_begin, time_end, teacher_id, area_id, lesson_id)
 VALUES
-  (0, 'mon', 1200, 1330, 1835294966, 0, 0),
-  (1, 'mon', 1400, 1500, 1835294966, 0, 1),
-  (2, 'wed', 1815, 1945, 1835294966, 0, 0)
+  (0, 1, 1200, 1330, 1835294966, 0, 0),
+  (1, 1, 1400, 1500, 1835294966, 0, 1),
+  (2, 3, 1815, 1945, 1835294966, 0, 0)
 """
 
 
