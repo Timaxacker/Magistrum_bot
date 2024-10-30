@@ -55,7 +55,8 @@ def add_information_in_table(connection, info):
 
 
 
-delete = "DROP TABLE lessons"
+delete = "DROP TABLE teachers"
+
 
 
 create_lessons_table = """
@@ -141,6 +142,7 @@ CREATE TABLE IF NOT EXISTS comments (
 """
 
 
+
 addition_lessons = """
 INSERT INTO
   lessons (id, day_of_week, time_begin, time_end, teacher_id, area_id, lesson_id)
@@ -155,7 +157,7 @@ addition_teachers = """
 INSERT INTO
   teachers (id, lastname, name, patronymic, tg_nick, teacher_state_id)
 VALUES
-  (1835294966, "Лазарев", "Тимофей", "Максимович", "Timahacker", 1)
+  (1835294966, "Лазарев", "Тимофей", "Максимович", "@Timahacker", 1)
 """
 
 
@@ -199,4 +201,21 @@ INSERT INTO
   comments (id, date, lesson_id, comment, teacher_id, info, active)
 VALUES
   (0, 06112024, 2, "Заболел", 1835294966, "Дети - цветы жизни!", 1)
+"""
+
+
+
+select_lessons_in_day = """
+SELECT
+  lessons.time_begin, lessons.time_end, teachers.tg_nick, areas.title, type_lesson.title
+FROM 
+  lessons 
+INNER JOIN 
+  teachers ON lessons.teacher_id = teachers.id
+INNER JOIN 
+  areas ON lessons.area_id = areas.id
+INNER JOIN 
+  type_lesson ON lessons.lesson_id = type_lesson.id
+WHERE 
+  lessons.day_of_week = 
 """

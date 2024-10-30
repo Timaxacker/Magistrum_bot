@@ -11,9 +11,9 @@ exch.bot = bot
 
 connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 
-# DBMS.execute_query(connection, DBMS.create_lessons_table)
-#DBMS.execute_query(connection, DBMS.addition_comment)
 # DBMS.execute_query(connection, DBMS.delete)
+# DBMS.execute_query(connection, DBMS.create_teachers_table)
+# DBMS.execute_query(connection, DBMS.addition_teachers)
 
 answer = None
 
@@ -35,20 +35,6 @@ def start(m, res=False):
     bot.register_next_step_handler(m, role)
     
     return True
-
-
-    """
-    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-    lst_of_but = ["Расписание", "Корректировать", "Неотмеченные"]
-    for i in lst_of_but:
-        markup.add(types.KeyboardButton(i))
-    
-    answer = "Hi, Надежда Борисовна!!!"
-    bot.send_message(m.chat.id, answer, reply_markup=markup)
-    bot.register_next_step_handler(m, menu)
-    """
-
- 
 
 
 @exch.propperWrapper()
@@ -95,14 +81,14 @@ def password(m):
         bot.send_message(m.chat.id, answer, reply_markup=markup)
         bot.register_next_step_handler(m, role)
 
-    return True
 
+    return True
 
 
 @exch.propperWrapper()    
 def admin_menu(m):
     if m.text.strip() == "Расписание":
-        answer =  "Выберите дату"
+        answer =  "Выбери дату"
         bot.send_message(m.chat.id, answer, reply_markup=calendar.create_calendar(name=calendar_1.prefix, year=now.year, month=now.month))
         
     elif m.text.strip() == "Корректировать":
@@ -132,7 +118,7 @@ def admin_menu(m):
     else:
         answer = "Нажимай на кнопки!"
         bot.send_message(m.chat.id, answer)
-        bot.register_next_step_handler(m, menu)
+        bot.register_next_step_handler(m, admin_menu)
 
         
 
@@ -146,8 +132,31 @@ def callback_inline(call: types.CallbackQuery):
     date = calendar.calendar_query_handler(bot=bot, call=call, name=name, action=action, year=year, month=month, day=day)
 
     if action == 'DAY':
-        bot.send_message(chat_id=call.from_user.id, text=f'Вы выбрали {date.strftime("%d.%m.%Y")}', reply_markup=types.ReplyKeyboardRemove())
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
         
+        answer = f'Вы выбрали {date.strftime("%d.%m.%Y")}'
+        bot.send_message(chat_id=call.from_user.id, text=answer, reply_markup=types.ReplyKeyboardRemove())
+
+        lst_sel = DBMS.execute_read_query(connection, DBMS.select_lessons_in_day + str(date.isoweekday()))
+        #print(lst_sel)
+
+        if len(lst_sel) == 0:
+            answer = "Нет занятий"
+        
+        else:
+            answer = ""
+            for i in lst_sel:
+                answer += f'{i[3]}: {i[2]}\t - \t{i[4]}\t{str(i[0])[:2]}:{str(i[0])[2:]} - {str(i[1])[:2]}:{str(i[1])[2:]}\n'
+
+            
+
+        bot.send_message(chat_id=call.from_user.id, text=answer, reply_markup=markup)
+        bot.register_next_step_handler(call.message, admin_menu)
+
+
         """
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         lst_of_but = ["Расписание", "Корректировать", "Неотмеченные"]
@@ -168,12 +177,12 @@ def callback_inline(call: types.CallbackQuery):
 
     elif action == 'CANCEL':
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные"]
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
 
         bot.send_message(chat_id=call.from_user.id, text='Отмена', reply_markup=markup)
-        bot.register_next_step_handler(call.message, menu)  # call.message
+        bot.register_next_step_handler(call.message, admin_menu)
 
     return True
 
