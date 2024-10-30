@@ -12,7 +12,7 @@ exch.bot = bot
 connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 
 # DBMS.execute_query(connection, DBMS.create_lessons_table)
-DBMS.execute_query(connection, DBMS.addition_comment)
+#DBMS.execute_query(connection, DBMS.addition_comment)
 # DBMS.execute_query(connection, DBMS.delete)
 
 answer = None
@@ -26,6 +26,19 @@ now = datetime.now()
 @bot.message_handler(commands=["start"])
 def start(m, res=False):
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    lst_of_but = ["Преподаватель", "Администратор"]
+    for i in lst_of_but:
+        markup.add(types.KeyboardButton(i))
+    
+    answer = "Привет! Кто ты?"
+    bot.send_message(m.chat.id, answer, reply_markup=markup)
+    bot.register_next_step_handler(m, role)
+    
+    return True
+
+
+    """
+    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     lst_of_but = ["Расписание", "Корректировать", "Неотмеченные"]
     for i in lst_of_but:
         markup.add(types.KeyboardButton(i))
@@ -33,17 +46,61 @@ def start(m, res=False):
     answer = "Hi, Надежда Борисовна!!!"
     bot.send_message(m.chat.id, answer, reply_markup=markup)
     bot.register_next_step_handler(m, menu)
+    """
+
+ 
+
+
+@exch.propperWrapper()
+def role(m):
+    if  m.text.strip() == "Преподаватель":
+        pass
     
+    elif  m.text.strip() == "Администратор":
+        answer = "Введи пароль"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, password)
+
+    else:
+        answer = "Нажимай на кнопки!"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, role)
+
     return True
 
 
-#@exch.propperWrapper()
-#def passowrd(m):
+@exch.propperWrapper()    
+def password(m):
+    if m.text.strip() == "0000":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+    
+        answer = "Hi, Надежда Борисовна!!!"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
+
+
+    else:
+        answer = "Пароль неверный"
+        bot.send_message(m.chat.id, answer)
+
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Преподаватель", "Администратор"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+    
+        answer = "Кто ты?"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, role)
+
+    return True
 
 
 
 @exch.propperWrapper()    
-def menu(m):
+def admin_menu(m):
     if m.text.strip() == "Расписание":
         answer =  "Выберите дату"
         bot.send_message(m.chat.id, answer, reply_markup=calendar.create_calendar(name=calendar_1.prefix, year=now.year, month=now.month))
