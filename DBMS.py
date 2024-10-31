@@ -55,7 +55,7 @@ def add_information_in_table(connection, info):
 
 
 
-delete = "DROP TABLE lessons"
+delete = "DELETE FROM lessons"
 
 
 
@@ -158,7 +158,8 @@ addition_teachers = """
 INSERT INTO
   teachers (id, lastname, name, patronymic, tg_nick, teacher_state_id)
 VALUES
-  (1835294966, "Лазарев", "Тимофей", "Максимович", "@Timahacker", 1)
+  (1835294966, "Лазарев", "Тимофей", "Максимович", "@Timahacker", 1),
+  (981758737, "Белобров", "Тимофей", "Павлович", "@Durshl4k", 1)
 """
 
 
@@ -233,4 +234,31 @@ INNER JOIN
   areas ON lessons.area_id = areas.id
 INNER JOIN 
   type_lesson ON lessons.lesson_id = type_lesson.id 
+"""
+
+
+select_lessons_for_change = """
+SELECT
+  lessons.id, lessons.time_begin, lessons.time_end, teachers.tg_nick, areas.title, type_lesson.title
+FROM 
+  lessons 
+INNER JOIN 
+  teachers ON lessons.teacher_id = teachers.id
+INNER JOIN 
+  areas ON lessons.area_id = areas.id
+INNER JOIN 
+  type_lesson ON lessons.lesson_id = type_lesson.id
+WHERE 
+  lessons.day_of_week_txt = 
+"""
+
+
+
+update_teacher_id = """
+UPDATE 
+  lessons
+SET 
+  teacher_id = 981758737
+WHERE 
+  id = 
 """
