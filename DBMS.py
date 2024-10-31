@@ -55,14 +55,15 @@ def add_information_in_table(connection, info):
 
 
 
-delete = "DROP TABLE teachers"
+delete = "DROP TABLE lessons"
 
 
 
 create_lessons_table = """
 CREATE TABLE IF NOT EXISTS lessons (
   id INTEGER PRIMARY KEY,
-  day_of_week INTEGER,
+  day_of_week_num INTEGER,
+  day_of_week_txt TEXT,
   time_begin INTEGER,
   time_end INTEGER,
   teacher_id INTEGER,
@@ -145,11 +146,11 @@ CREATE TABLE IF NOT EXISTS comments (
 
 addition_lessons = """
 INSERT INTO
-  lessons (id, day_of_week, time_begin, time_end, teacher_id, area_id, lesson_id)
+  lessons (id, day_of_week_num, day_of_week_txt, time_begin, time_end, teacher_id, area_id, lesson_id)
 VALUES
-  (0, 1, 1200, 1330, 1835294966, 0, 0),
-  (1, 1, 1400, 1500, 1835294966, 0, 1),
-  (2, 3, 1815, 1945, 1835294966, 0, 0)
+  (0, 1, "Понедельник", 1200, 1330, 1835294966, 0, 0),
+  (1, 1, "Понедельник", 1400, 1500, 1835294966, 0, 1),
+  (2, 3, "Среда", 1815, 1945, 1835294966, 0, 0)
 """
 
 
@@ -217,5 +218,19 @@ INNER JOIN
 INNER JOIN 
   type_lesson ON lessons.lesson_id = type_lesson.id
 WHERE 
-  lessons.day_of_week = 
+  lessons.day_of_week_num = 
+"""
+
+
+select_all_lessons = """
+SELECT
+  lessons.day_of_week_txt, lessons.time_begin, lessons.time_end, teachers.tg_nick, areas.title, type_lesson.title
+FROM 
+  lessons 
+INNER JOIN 
+  teachers ON lessons.teacher_id = teachers.id
+INNER JOIN 
+  areas ON lessons.area_id = areas.id
+INNER JOIN 
+  type_lesson ON lessons.lesson_id = type_lesson.id 
 """

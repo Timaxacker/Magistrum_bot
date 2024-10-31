@@ -12,10 +12,11 @@ exch.bot = bot
 connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 
 # DBMS.execute_query(connection, DBMS.delete)
-# DBMS.execute_query(connection, DBMS.create_teachers_table)
-# DBMS.execute_query(connection, DBMS.addition_teachers)
+# DBMS.execute_query(connection, DBMS.create_lessons_table)
+# DBMS.execute_query(connection, DBMS.addition_lessons)
 
 answer = None
+channel = '-1002324319517'
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
 calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
@@ -112,6 +113,28 @@ def admin_menu(m):
         bot.send_message(1835294966, "Отметится!")
         bot.register_next_step_handler(m, menu)
         """
+
+    elif m.text.strip() == "Выложить расписание":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+
+        lst_sel = DBMS.execute_read_query(connection, DBMS.select_all_lessons)
+        #print(lst_sel)
+
+        if len(lst_sel) == 0:
+            answer = "Нет занятий"
+        
+        else:
+            answer = ""
+            for i in lst_sel:
+                answer += f'<u><b>{i[0]}</b></u>\n{i[4]}: {i[3]}\t - \t{i[5]}\t{str(i[1])[:2]}:{str(i[1])[2:]} - {str(i[2])[:2]}:{str(i[2])[2:]}\n'
+
+
+        bot.send_message(channel, answer, reply_markup=markup, parse_mode="HTML")
+        bot.register_next_step_handler(m, admin_menu)
 
 
 
