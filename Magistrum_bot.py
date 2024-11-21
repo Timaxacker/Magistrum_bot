@@ -20,6 +20,8 @@ channel = '-1002324319517'
 answer = None
 check_for_les = {}
 lesson_id = None
+les = []
+i = 1
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
 calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
@@ -43,11 +45,22 @@ def start(m, res=False):
 
 @exch.propperWrapper()
 def role(m):
+    global i, les
+
     if  m.text.strip() == "Преподаватель":
+        """
         answer = "Пока не работает("
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, role)
-    
+        """
+
+        les = []
+        answer = "день недели"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, add1)
+
+
+
     elif  m.text.strip() == "Администратор":
         answer = "Введи пароль"
         bot.send_message(m.chat.id, answer)
@@ -313,6 +326,107 @@ def callback_inline(call: types.CallbackQuery):
         bot.register_next_step_handler(call.message, admin_menu)
 
     return True
+
+
+
+
+
+
+@exch.propperWrapper()
+def add1(m):
+    global i
+    les.append(i)
+    les.append(int(m.text.strip()))
+    #print(les)
+
+    if les[1] == 1:
+        les.append("Понедельник")
+
+    elif les[1] == 2:
+        les.append("Вторник")
+
+    elif les[1] == 3:
+        les.append("Среда")
+
+    elif les[1] == 4:
+        les.append("Четверг")
+
+    elif les[1] == 5:
+        les.append("Пятница")
+
+    elif les[1] == 6:
+        les.append("Суббота")
+
+    elif les[1] == 7:
+        les.append("Воскресенье")
+
+    else:
+        print("fuck")
+
+    answer = "начало"
+    bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, add2)
+
+    return True
+
+
+@exch.propperWrapper()
+def add2(m):
+    les.append(int(m.text.strip()))
+    
+    answer = "конец"
+    bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, add3)
+
+    return True
+
+
+@exch.propperWrapper()
+def add3(m):
+    les.append(int(m.text.strip()))
+    
+    answer = "учитель"
+    bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, add4)
+
+    return True
+
+
+@exch.propperWrapper()
+def add4(m):
+    les.append(int(m.text.strip()))
+    
+    answer = "ареа"
+    bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, add5)
+
+    return True
+
+
+@exch.propperWrapper()
+def add5(m):
+    global i, les
+    
+    les.append(int(m.text.strip()))
+    les.append(1)
+
+    #print(les)
+    
+
+    info = tuple(les)
+    #print(info)
+    DBMS.add_lesson_in_table(connection, info)
+    les = []
+    i += 1
+
+    answer = "день недели"
+    bot.send_message(m.chat.id, answer)
+    bot.register_next_step_handler(m, add1)
+
+    return True
+
+
+
 
 
 
