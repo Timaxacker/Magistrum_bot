@@ -55,7 +55,7 @@ def add_information_in_table(connection, info):
 
 
 
-delete = "DELETE FROM lessons WHERE id > 0"
+delete = "DELETE FROM teachers"
 
 
 
@@ -157,32 +157,32 @@ INSERT INTO
   teachers (id, lastname, name, patronymic, tg_nick, teacher_state_id)
 VALUES
   (1835294966, "Лазарев", "Тимофей", "Максимович", "@Timahacker", 1),
-  (0, "х", "Таня", "х", "@x", 1),
-  (1, "х", "Тимур", "х", "@x", 1),
-  (2, "х", "Саша", "х", "@x", 1),
-  (3, "Линда", "Мария", "х", "@x", 1),
-  (4, "Ларина", "Анастасия", "х", "@x", 1),
+  (0, "х", "Таня", "х", "@maidi17", 1),
+  (1, "х", "Тимур", "х", "@ohetb", 1),
+  (2, "х", "Саша", "х", "@myshshish", 1),
+  (3, "Линда", "Мария", "х", "@Maria_Linda_1", 1),
+  (4, "Ларина", "Анастасия", "х", "@new_nst", 1),
   (5, "Лазарева", "Кристина", "х", "@x", 1),
-  (6, "Поедайлова", "Кристина", "х", "@x", 1),
-  (7, "Логовинская", "Маша", "х", "@x", 1),
-  (8, "Козлов", "Артем", "х", "@x", 1),
-  (9, "Тузова", "Света", "х", "@x", 1),
-  (10, "Гуноев", "Адам", "х", "@x", 1),
-  (11, "Мельник", "Анастасия", "х", "@x", 1),
-  (12, "Шушкина", "Мария", "х", "@x", 1),
-  (13, "Супрунова", "Даша", "х", "@x", 1),
-  (14, "Неизвестная", "Катя", "х", "@x", 1),
-  (15, "Каверин", "Ваня", "х", "@x", 1),
-  (16, "Пименов", "Дмитрий", "х", "@x", 1),
-  (17, "Ишина", "Надежда", "х", "@x", 1),
+  (6, "Поедайлова", "Кристина", "х", "@Krisssstusha", 1),
+  (7, "Логовинская", "Маша", "х", "@itxbazilio", 1),
+  (8, "Козлов", "Артем", "х", "@tema_kaif", 1),
+  (9, "Тузова", "Света", "х", "@murrrks_03", 1),
+  (10, "Гуноев", "Адам", "х", "@m0untain_j3w", 1),
+  (11, "Мельник", "Анастасия", "х", "@sssvvvoobboodda", 1),
+  (12, "Шушкина", "Мария", "х", "@Fpdp2", 1),
+  (13, "Супрунова", "Даша", "х", "@daria_ss13", 1),
+  (14, "Неизвестная", "Катя", "х", "@neikatya", 1),
+  (15, "Каверин", "Ваня", "х", "@Tangusik", 1),
+  (16, "Пименов", "Дмитрий", "х", "@pimenovdm0125", 1),
+  (17, "Ишина", "Надежда", "х", "@NadiIshi", 1),
   (18, "х", "Мирослав", "х", "@x", 1),
-  (19, "х", "Вова", "х", "@x", 1),
-  (20, "Тихомирова", "Катя", "х", "@x", 1),
+  (19, "х", "Вова", "х", "@vladimirzausaev", 1),
+  (20, "Тихомирова", "Катя", "х", "@Kate_Starrr", 1),
   (21, "Абишова", "Алина", "х", "@x", 1),
-  (22, "х", "Слава", "х", "@x", 1),
+  (22, "х", "Слава", "х", "@Vagoretka", 1),
   (981758737, "Белобров", "Тима", "Павлович", "@Durshl4k", 1),
   (23, "х", "Яна", "х", "@x", 1),
-  (24, "х", "Андрей", "х", "@x", 1),
+  (24, "х", "Андрей", "х", "@andreybagrow", 1),
   (25, "х", "Илья", "х", "@x", 1),
   (26, "Круглов", "Тимофей", "х", "@x", 1)
 """
@@ -240,7 +240,7 @@ VALUES
   (45, "SunОбвод", "х", 1),
   (46, "Sun Респ", "х", 1),
   (47, "Умка Лидии Зверевой 9 к1", "х", 1),
-  (48, "Песочка (скиду и веду)", "х", 1),
+  (48, "Песочка (скиду и веду)", "х", 1),5
   (49, "Северный 4 Эрудит", "х", 1),
   (50, "SunПарад", "х", 1)
 """
@@ -298,17 +298,13 @@ WHERE
 """
 
 
-select_all_lessons = """
+select_day_of_week_for_post = """
 SELECT
-  lessons.day_of_week_txt, lessons.time_begin, lessons.time_end, teachers.tg_nick, areas.title, type_lesson.title
+  lessons.day_of_week_txt
 FROM 
-  lessons 
-INNER JOIN 
-  teachers ON lessons.teacher_id = teachers.id
-INNER JOIN 
-  areas ON lessons.area_id = areas.id
-INNER JOIN 
-  type_lesson ON lessons.lesson_id = type_lesson.id 
+  lessons
+WHERE 
+  lessons.day_of_week_num = 
 """
 
 
@@ -328,12 +324,82 @@ WHERE
 """
 
 
+select_time_begin_for_change = """
+SELECT
+  time_begin
+FROM 
+  lessons 
+WHERE 
+  id = 
+"""
 
-update_teacher_id = """
+
+select_time_end_for_change = """
+SELECT
+  time_end
+FROM 
+  lessons 
+WHERE 
+  id = 
+"""
+
+
+select_areas_for_change = """
+SELECT
+  id, title
+FROM 
+  areas 
+"""
+
+
+select_teachers_for_change = """
+SELECT
+  id, lastname, name
+FROM 
+  teachers 
+"""
+
+
+
+update_teacher_id0 = """
 UPDATE 
   lessons
 SET 
-  teacher_id = 981758737
+  teacher_id = """ 
+update_teacher_id1 = """
+WHERE 
+  id = 
+"""
+
+
+update_time_begin0 = """
+UPDATE 
+  lessons
+SET 
+  time_begin = """ 
+update_time_begin1 = """
+WHERE 
+  id = 
+"""
+
+
+update_time_end0 = """
+UPDATE 
+  lessons
+SET 
+  time_end = """ 
+update_time_end1 = """
+WHERE 
+  id = 
+"""
+
+
+update_area_id0 = """
+UPDATE 
+  lessons
+SET 
+  area_id = """ 
+update_area_id1 = """
 WHERE 
   id = 
 """

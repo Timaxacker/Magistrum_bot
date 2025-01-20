@@ -11,17 +11,15 @@ exch.bot = bot
 
 connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 
-# DBMS.execute_query(connection, DBMS.delete)
+DBMS.execute_query(connection, DBMS.delete)
 # DBMS.execute_query(connection, DBMS.create_lessons_table)
-# DBMS.execute_query(connection, DBMS.addition_lessons)
+DBMS.execute_query(connection, DBMS.addition_teachers)
 
 channel = '-1002324319517'
 
 answer = None
 check_for_les = {}
 lesson_id = None
-les = []
-i = 1
 
 calendar = Calendar(language=RUSSIAN_LANGUAGE)
 calendar_1 = CallbackData('calendar_1', 'action', 'year', 'month', 'day')
@@ -45,21 +43,10 @@ def start(m, res=False):
 
 @exch.propperWrapper()
 def role(m):
-    global i, les
-
     if  m.text.strip() == "Преподаватель":
-        """
         answer = "Пока не работает("
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, role)
-        """
-
-        les = []
-        answer = "день недели"
-        bot.send_message(m.chat.id, answer)
-        bot.register_next_step_handler(m, add1)
-
-
 
     elif  m.text.strip() == "Администратор":
         answer = "Введи пароль"
@@ -78,7 +65,7 @@ def role(m):
 def password(m):
     if m.text.strip() == "0000":
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
     
@@ -112,7 +99,7 @@ def admin_menu(m):
         
     elif m.text.strip() == "Корректировать":
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+        lst_of_but = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье", "Отмена"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
@@ -125,7 +112,7 @@ def admin_menu(m):
     elif m.text.strip() == "Неотмеченные":
         
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
@@ -138,28 +125,24 @@ def admin_menu(m):
 
     elif m.text.strip() == "Выложить расписание":
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        lst_of_but = ["Выложить", "Корректировать", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+
+        answer = "Его надо корректировать?"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, check_schedule)
+
+
+    elif m.text.strip() == "Отмена":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Преподаватель", "Администратор"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
-
-        lst_sel = DBMS.execute_read_query(connection, DBMS.select_all_lessons)
-        #print(lst_sel)
-
-        if len(lst_sel) == 0:
-            answer = "Нет занятий"
-        
-        else:
-            answer = ""
-            for i in lst_sel:
-                answer += f'<u><b>{i[0]}</b></u>\n{i[4]}: {i[3]} - {i[5]} {str(i[1])[:2]}:{str(i[1])[2:]} - {str(i[2])[:2]}:{str(i[2])[2:]}\n'
-
-
-        bot.send_message(channel, answer, parse_mode="HTML")
-        answer = "Выложил"
+        answer = "Кто ты?"
         bot.send_message(m.chat.id, answer, reply_markup=markup)
-        bot.register_next_step_handler(m, admin_menu)
-
+        bot.register_next_step_handler(m, role)
 
 
     else:
@@ -173,16 +156,41 @@ def admin_menu(m):
 
 
 @exch.propperWrapper()
-def day_of_week(m):
-    global check_for_les
+def check_schedule(m):
+    if m.text.strip() == "Выложить":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+
+        lst_sel = DBMS.execute_read_query(connection, DBMS.select_lessons_in_day  + str(datetime.today().isoweekday()))
+        # print(lst_sel)
+
+        if len(lst_sel) == 0:
+            answer = "Нет занятий"
+        
+        else:
+            day_of_week_sel = DBMS.execute_read_query(connection, DBMS.select_day_of_week_for_post  + str(datetime.today().isoweekday()))
+            answer = f'<u><b>{day_of_week_sel[0][0]}</b></u>\n'
+            for i in lst_sel:
+                answer += f'{i[3]}: {i[2]} - {i[4]} {str(i[0])[:2]}:{str(i[0])[2:]} - {str(i[1])[:2]}:{str(i[1])[2:]}\n\n'
+
+
+        bot.send_message(channel, answer, parse_mode="HTML")
+        answer = "Выложил"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
     
-    if m.text.strip() in ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]:
-        lst_sel = DBMS.execute_read_query(connection, DBMS.select_lessons_for_change + f'"{m.text.strip()}"')
-        #print(lst_sel)
+
+    elif m.text.strip() == "Корректировать":
+        day_of_week_sel = DBMS.execute_read_query(connection, DBMS.select_day_of_week_for_post  + str(datetime.today().isoweekday()))
+        lst_sel = DBMS.execute_read_query(connection, DBMS.select_lessons_for_change + f'"{day_of_week_sel[0][0]}"')
+        print(lst_sel)
 
         if len(lst_sel) == 0:
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+            lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
             for i in lst_of_but:
                 markup.add(types.KeyboardButton(i))
             
@@ -198,13 +206,82 @@ def day_of_week(m):
                 check_for_les[i[0]] = f'{i[4]}: {i[3]} - {i[5]} {str(i[1])[:2]}:{str(i[1])[2:]} - {str(i[2])[:2]}:{str(i[2])[2:]}'
 
             markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-            lst_of_but = list(check_for_les.values())
+            lst_of_but = list(check_for_les.values()) + ["Отмена"]
             for i in lst_of_but:
                 markup.add(types.KeyboardButton(i))
 
             answer = "Выбери занятие"
             bot.send_message(m.chat.id, answer, reply_markup=markup)
             bot.register_next_step_handler(m, change_lesson)
+    
+
+    elif m.text.strip() == "Отмена":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+        answer = "Отмена"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
+    
+    
+    else:
+        answer = "Нажимай на кнопки!"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, check_schedule)
+    
+    
+
+
+
+    return True
+
+
+@exch.propperWrapper()
+def day_of_week(m):
+    global check_for_les
+    
+    if m.text.strip() in ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]:
+        lst_sel = DBMS.execute_read_query(connection, DBMS.select_lessons_for_change + f'"{m.text.strip()}"')
+        #print(lst_sel)
+
+        if len(lst_sel) == 0:
+            markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+            lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+            for i in lst_of_but:
+                markup.add(types.KeyboardButton(i))
+            
+            answer = "Нет занятий"
+            bot.send_message(m.chat.id, answer, reply_markup=markup)
+            bot.register_next_step_handler(m, admin_menu)
+
+
+
+        else:
+            check_for_les = {}
+            for i in lst_sel:
+                check_for_les[i[0]] = f'{i[4]}: {i[3]} - {i[5]} {str(i[1])[:2]}:{str(i[1])[2:]} - {str(i[2])[:2]}:{str(i[2])[2:]}'
+
+            markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+            lst_of_but = list(check_for_les.values()) + ["Отмена"]
+            for i in lst_of_but:
+                markup.add(types.KeyboardButton(i))
+
+            answer = "Выбери занятие"
+            bot.send_message(m.chat.id, answer, reply_markup=markup)
+            bot.register_next_step_handler(m, change_lesson)
+
+
+    elif m.text.strip() == "Отмена":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+        answer = "Отмена"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
 
         
     else:
@@ -224,13 +301,25 @@ def change_lesson(m):
         lesson_id = next((key for key, value in check_for_les.items() if value == m.text.strip()))
         
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Место", "Преподаватель", "Вид занятия", "Время начала", "Время конца"]
+        lst_of_but = ["Место", "Преподаватель", "Вид занятия", "Время начала", "Время конца", "Отмена"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
         answer = "Что поменять?"
         bot.send_message(m.chat.id, answer, reply_markup=markup)
         bot.register_next_step_handler(m, change_parameter)
+
+
+    elif m.text.strip() == "Отмена":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+        answer = "Отмена"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, day_of_week)
+
 
 
     else:
@@ -244,36 +333,63 @@ def change_lesson(m):
 @exch.propperWrapper()
 def change_parameter(m):
     if m.text.strip() == "Место":
-        answer = "Работает только препод!"
-        bot.send_message(m.chat.id, answer)
-        bot.register_next_step_handler(m, change_parameter)
+        lst_areas = DBMS.execute_read_query(connection, DBMS.select_areas_for_change)
+        
+        lst_of_but = []
+        for i in lst_areas:
+            lst_of_but.append(i[1])
 
-    elif m.text.strip() == "Преподаватель":
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
-        DBMS.execute_query(connection, DBMS.update_teacher_id + str(lesson_id))
-
-        answer = "Изменнено"
+        answer = "Выбери новое место занятия"
         bot.send_message(m.chat.id, answer, reply_markup=markup)
-        bot.register_next_step_handler(m, admin_menu)
+        bot.register_next_step_handler(m, change_area)
+
+    elif m.text.strip() == "Преподаватель":
+        lst_teachers = DBMS.execute_read_query(connection, DBMS.select_teachers_for_change)
+        # print(lst_teachers)
+
+        lst_of_but = []
+        for i in lst_teachers:
+            lst_of_but.append(i[2])
+
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+        answer = "Выбери нового преподавателя"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, change_teacher)
 
     elif m.text.strip() == "Вид занятия":
-        answer = "Работает только препод!"
+        answer = "Пока не работает("
         bot.send_message(m.chat.id, answer)
         bot.register_next_step_handler(m, change_parameter)
 
     elif m.text.strip() == "Время начала":
-        answer = "Работает только препод!"
+        answer = "Напиши новое время начала"
         bot.send_message(m.chat.id, answer)
-        bot.register_next_step_handler(m, change_parameter)
+        bot.register_next_step_handler(m, change_time_begin)
+
 
     elif m.text.strip() == "Время конца":
-        answer = "Работает только препод!"
+        answer = "Напиши новое время конца"
         bot.send_message(m.chat.id, answer)
-        bot.register_next_step_handler(m, change_parameter)
+        bot.register_next_step_handler(m, change_time_end)
+
+
+    elif m.text.strip() == "Отмена":
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = list(check_for_les.values()) + ["Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+        
+        answer = "Отмена"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, change_lesson)
+
 
     else:
         answer = "Нажимай на кнопки!"
@@ -285,6 +401,124 @@ def change_parameter(m):
 
 
 @exch.propperWrapper()
+def change_time_begin(m):
+    lst_time = DBMS.execute_read_query(connection, DBMS.select_time_end_for_change + str(lesson_id))
+    
+    if lst_time[0][0] - int(m.text.strip()[:2] + m.text.strip()[3:]) >= 0:
+        DBMS.execute_query(connection, DBMS.update_time_begin0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_begin1 + str(lesson_id))
+    
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+
+        answer = "Изменено"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
+
+    else:
+        answer = "Некорректное время"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, change_time_begin)
+
+    return True
+
+
+@exch.propperWrapper()
+def change_time_end(m):
+    lst_time = DBMS.execute_read_query(connection, DBMS.select_time_begin_for_change + str(lesson_id))
+    
+    if int(m.text.strip()[:2] + m.text.strip()[3:]) - lst_time[0][0] >= 0:
+        DBMS.execute_query(connection, DBMS.update_time_end0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_end1 + str(lesson_id))
+    
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+
+        answer = "Изменено"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
+
+    else:
+        answer = "Некорректное время"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, change_time_end)
+
+    return True
+
+
+@exch.propperWrapper()
+def change_area(m):
+    lst_areas = DBMS.execute_read_query(connection, DBMS.select_areas_for_change)
+    #print(lst_areas[0][0], lst_areas[0][1])
+
+    lst_of_title = []
+    for i in lst_areas:
+        lst_of_title.append(i[1])
+
+    if m.text.strip() in lst_of_title:
+        area_id = None
+        
+        for i in range(len(lst_areas)):
+            if lst_areas[i][1] == m.text.strip():
+                area_id = lst_areas[i][0]
+        
+        DBMS.execute_query(connection, DBMS.update_area_id0 + str(area_id) + DBMS.update_area_id1 + str(lesson_id))
+    
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+
+        answer = "Изменено"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
+
+    else:
+        answer = "Некорректное название"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, change_area)
+
+    return True
+
+
+@exch.propperWrapper()
+def change_teacher(m):
+    lst_teachers = DBMS.execute_read_query(connection, DBMS.select_teachers_for_change)
+    #print(lst_areas[0][0], lst_areas[0][1])
+
+    lst_of_name = []
+    for i in lst_teachers:
+        lst_of_name.append(i[2])
+
+    if m.text.strip() in lst_of_name:
+        teacher_id = None
+        
+        for i in range(len(lst_teachers)):
+            if lst_teachers[i][2] == m.text.strip():
+                teacher_id = lst_teachers[i][0]
+        
+        DBMS.execute_query(connection, DBMS.update_teacher_id0 + str(teacher_id) + DBMS.update_teacher_id1 + str(lesson_id))
+    
+        markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
+        for i in lst_of_but:
+            markup.add(types.KeyboardButton(i))
+
+        answer = "Изменено"
+        bot.send_message(m.chat.id, answer, reply_markup=markup)
+        bot.register_next_step_handler(m, admin_menu)
+
+    else:
+        answer = "Некорректное название"
+        bot.send_message(m.chat.id, answer)
+        bot.register_next_step_handler(m, change_teacher)
+
+    return True
+
+
+@exch.propperWrapper()
 @bot.callback_query_handler(func=lambda call: call.data.startswith(calendar_1.prefix))
 def callback_inline(call: types.CallbackQuery):
     name, action, year, month, day = call.data.split(calendar_1.sep)
@@ -292,7 +526,7 @@ def callback_inline(call: types.CallbackQuery):
 
     if action == 'DAY':
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
@@ -318,7 +552,7 @@ def callback_inline(call: types.CallbackQuery):
 
     elif action == 'CANCEL':
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание"]
+        lst_of_but = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Отмена"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
 
@@ -326,108 +560,6 @@ def callback_inline(call: types.CallbackQuery):
         bot.register_next_step_handler(call.message, admin_menu)
 
     return True
-
-
-
-
-
-
-@exch.propperWrapper()
-def add1(m):
-    global i
-    les.append(i)
-    les.append(int(m.text.strip()))
-    #print(les)
-
-    if les[1] == 1:
-        les.append("Понедельник")
-
-    elif les[1] == 2:
-        les.append("Вторник")
-
-    elif les[1] == 3:
-        les.append("Среда")
-
-    elif les[1] == 4:
-        les.append("Четверг")
-
-    elif les[1] == 5:
-        les.append("Пятница")
-
-    elif les[1] == 6:
-        les.append("Суббота")
-
-    elif les[1] == 7:
-        les.append("Воскресенье")
-
-    else:
-        print("fuck")
-
-    answer = "начало"
-    bot.send_message(m.chat.id, answer)
-    bot.register_next_step_handler(m, add2)
-
-    return True
-
-
-@exch.propperWrapper()
-def add2(m):
-    les.append(int(m.text.strip()))
-    
-    answer = "конец"
-    bot.send_message(m.chat.id, answer)
-    bot.register_next_step_handler(m, add3)
-
-    return True
-
-
-@exch.propperWrapper()
-def add3(m):
-    les.append(int(m.text.strip()))
-    
-    answer = "учитель"
-    bot.send_message(m.chat.id, answer)
-    bot.register_next_step_handler(m, add4)
-
-    return True
-
-
-@exch.propperWrapper()
-def add4(m):
-    les.append(int(m.text.strip()))
-    
-    answer = "ареа"
-    bot.send_message(m.chat.id, answer)
-    bot.register_next_step_handler(m, add5)
-
-    return True
-
-
-@exch.propperWrapper()
-def add5(m):
-    global i, les
-    
-    les.append(int(m.text.strip()))
-    les.append(1)
-
-    #print(les)
-    
-
-    info = tuple(les)
-    #print(info)
-    DBMS.add_lesson_in_table(connection, info)
-    les = []
-    i += 1
-
-    answer = "день недели"
-    bot.send_message(m.chat.id, answer)
-    bot.register_next_step_handler(m, add1)
-
-    return True
-
-
-
-
 
 
 
