@@ -11,9 +11,9 @@ exch.bot = bot
 
 connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 
-DBMS.execute_query(connection, DBMS.delete)
+# DBMS.execute_query(connection, DBMS.delete)
 # DBMS.execute_query(connection, DBMS.create_lessons_table)
-DBMS.execute_query(connection, DBMS.addition_teachers)
+# DBMS.execute_query(connection, DBMS.addition_teachers)
 
 channel = '-1002324319517'
 
@@ -30,7 +30,7 @@ now = datetime.now()
 @bot.message_handler(commands=["start"])
 def start(m, res=False):
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-    lst_of_but = ["Преподаватель", "Администратор"]
+    lst_of_but = ["Администратор", "Преподаватель"]
     for i in lst_of_but:
         markup.add(types.KeyboardButton(i))
     
@@ -79,7 +79,7 @@ def password(m):
         bot.send_message(m.chat.id, answer)
 
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Преподаватель", "Администратор"]
+        lst_of_but = ["Администратор", "Преподаватель"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
     
@@ -136,7 +136,7 @@ def admin_menu(m):
 
     elif m.text.strip() == "Отмена":
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        lst_of_but = ["Преподаватель", "Администратор"]
+        lst_of_but = ["Администратор", "Преподаватель"]
         for i in lst_of_but:
             markup.add(types.KeyboardButton(i))
         
