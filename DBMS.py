@@ -77,6 +77,24 @@ CREATE TABLE IF NOT EXISTS lessons (
 """
 
 
+create_lessons_week_table = """
+CREATE TABLE IF NOT EXISTS lessons_week (
+  id INTEGER PRIMARY KEY,
+  day_of_week_num INTEGER,
+  day_of_week_txt TEXT,
+  time_begin INTEGER,
+  time_end INTEGER,
+  teacher_id INTEGER,
+  area_id INTEGER,
+  lesson_id INTEGER,
+  
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id),
+  FOREIGN KEY (area_id) REFERENCES areas(id),
+  FOREIGN KEY (lesson_id) REFERENCES lesson_types(id)
+);
+"""
+
+
 create_teachers_table = """
 CREATE TABLE IF NOT EXISTS teachers (
   id INTEGER PRIMARY KEY,
@@ -147,6 +165,14 @@ CREATE TABLE IF NOT EXISTS comments (
 addition_lessons = """
 INSERT INTO
   lessons (id, day_of_week_num, day_of_week_txt, time_begin, time_end, teacher_id, area_id, lesson_id)
+VALUES
+  (0, 2, "Вторник", 1930, 2100, 1835294966, 0, 0)
+"""
+
+
+addition_lessons_week = """
+INSERT INTO
+  lessons_week (id, day_of_week_num, day_of_week_txt, time_begin, time_end, teacher_id, area_id, lesson_id)
 VALUES
   (0, 2, "Вторник", 1930, 2100, 1835294966, 0, 0)
 """
@@ -406,10 +432,10 @@ WHERE
 
 
 
-def add_lesson_in_table(connection, info):
+def add_lesson_week_in_table(connection, info):
   add_lesson_in_table_query = """
   INSERT INTO
-    lessons (id, day_of_week_num, day_of_week_txt, time_begin, time_end, teacher_id, area_id, lesson_id)
+    lessons_week (id, day_of_week_num, day_of_week_txt, time_begin, time_end, teacher_id, area_id, lesson_id)
   VALUES
     (?, ?, ?, ?, ?, ?, ?, ?);
   """

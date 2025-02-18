@@ -12,7 +12,7 @@ exch.bot = bot
 connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 
 # DBMS.execute_query(connection, DBMS.delete)
-# DBMS.execute_query(connection, DBMS.create_lessons_table)
+# DBMS.execute_query(connection, DBMS.create_lessons_week_table)
 # DBMS.execute_query(connection, DBMS.addition_teachers)
 
 channel = '-1002324319517'
