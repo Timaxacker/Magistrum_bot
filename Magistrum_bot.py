@@ -15,6 +15,11 @@ connection = DBMS.create_connection(f"{sys.path[0]}/database.sqlite")
 # DBMS.execute_query(connection, DBMS.create_lessons_week_table)
 # DBMS.execute_query(connection, DBMS.addition_teachers)
 
+DBMS.execute_query(connection, DBMS.clean_lessons_week_table)
+for i in range(90):
+    info = DBMS.execute_read_query(connection, DBMS.select_lesson_for_drop + str(i))
+    DBMS.add_lesson_week_in_table(connection, info[0])
+
 channel = '-1002324319517'
 
 variables = {}
@@ -117,6 +122,8 @@ def admin_menu(m):
         bot.send_message(m.chat.id, variables[m.from_user.id]['answer'], reply_markup=calendar.create_calendar(name=calendar_1.prefix, year=now.year, month=now.month))
         
     elif m.text.strip() == "Общая корректировка":
+        variables[m.from_user.id]['adjustment_flag'] = False
+        
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         variables[m.from_user.id]['lst_of_but'] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье", "Отмена"]
         for i in variables[m.from_user.id]['lst_of_but']:
@@ -152,14 +159,16 @@ def admin_menu(m):
 
 
     elif m.text.strip() == "Корректировать":
+        variables[m.from_user.id]['adjustment_flag'] = True
+        
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
-        variables[m.from_user.id]['lst_of_but'] = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Общая корректировка", "Отмена"]
+        variables[m.from_user.id]['lst_of_but'] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье", "Отмена"]
         for i in variables[m.from_user.id]['lst_of_but']:
             markup.add(types.KeyboardButton(i))
         
-        variables[m.from_user.id]['answer'] = "Пока не работает("
+        variables[m.from_user.id]['answer'] = "Выбери день недели"
         bot.send_message(m.chat.id, variables[m.from_user.id]['answer'], reply_markup=markup)
-        bot.register_next_step_handler(m, admin_menu)
+        bot.register_next_step_handler(m, day_of_week)
 
 
     elif m.text.strip() == "Отмена":
@@ -196,6 +205,8 @@ def check_schedule(m):
 
 
     elif m.text.strip() == "Корректировать":
+        variables[m.from_user.id]['adjustment_flag'] = True
+
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         variables[m.from_user.id]['lst_of_but'] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье", "Отмена"]
         for i in variables[m.from_user.id]['lst_of_but']:
@@ -267,7 +278,7 @@ def post_schedule(m):
             markup.add(types.KeyboardButton(i))
         
 
-    variables[m.from_user.id]['lst_sel'] = DBMS.execute_read_query(connection, DBMS.select_lessons_in_day  + str(variables[m.from_user.id]['day_for_post_schedule']))
+    variables[m.from_user.id]['lst_sel'] = DBMS.execute_read_query(connection, DBMS.select_lessons_week_in_day  + str(variables[m.from_user.id]['day_for_post_schedule']))
     # print(variables[m.from_user.id]['lst_sel'])
 
     if len(variables[m.from_user.id]['lst_sel']) == 0:
@@ -292,7 +303,11 @@ def post_schedule(m):
 @exch.propperWrapper()
 def day_of_week(m):
     if m.text.strip() in ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]:
-        variables[m.from_user.id]['lst_sel'] = DBMS.execute_read_query(connection, DBMS.select_lessons_for_change + f'"{m.text.strip()}"')
+        if variables[m.from_user.id]['adjustment_flag']:
+            variables[m.from_user.id]['lst_sel'] = DBMS.execute_read_query(connection, DBMS.select_lessons_week_for_change + f'"{m.text.strip()}"')
+        else:
+            variables[m.from_user.id]['lst_sel'] = DBMS.execute_read_query(connection, DBMS.select_lessons_for_change + f'"{m.text.strip()}"')
+        
         # print(variables[m.from_user.id]['lst_sel'])
 
         if len(variables[m.from_user.id]['lst_sel']) == 0:
@@ -452,10 +467,17 @@ def change_parameter(m):
 
 @exch.propperWrapper()
 def change_time_begin(m):
-    variables[m.from_user.id]['lst_time'] = DBMS.execute_read_query(connection, DBMS.select_time_end_for_change + str(variables[m.from_user.id]['lesson_id']))
+    if variables[m.from_user.id]['adjustment_flag']:
+        variables[m.from_user.id]['lst_time'] = DBMS.execute_read_query(connection, DBMS.select_time_end_week_for_change + str(variables[m.from_user.id]['lesson_id']))
+    else:
+        variables[m.from_user.id]['lst_time'] = DBMS.execute_read_query(connection, DBMS.select_time_end_for_change + str(variables[m.from_user.id]['lesson_id']))
     
+
     if variables[m.from_user.id]['lst_time'][0][0] - int(m.text.strip()[:2] + m.text.strip()[3:]) >= 0:
-        DBMS.execute_query(connection, DBMS.update_time_begin0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_begin1 + str(variables[m.from_user.id]['lesson_id']))
+        if variables[m.from_user.id]['adjustment_flag']:
+            DBMS.execute_query(connection, DBMS.update_time_begin_week0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_begin1 + str(variables[m.from_user.id]['lesson_id']))
+        else:
+            DBMS.execute_query(connection, DBMS.update_time_begin0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_begin1 + str(variables[m.from_user.id]['lesson_id']))
     
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         variables[m.from_user.id]['lst_of_but'] = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Общая корректировка", "Отмена"]
@@ -476,10 +498,17 @@ def change_time_begin(m):
 
 @exch.propperWrapper()
 def change_time_end(m):
-    variables[m.from_user.id]['lst_time'] = DBMS.execute_read_query(connection, DBMS.select_time_begin_for_change + str(variables[m.from_user.id]['lesson_id']))
+    if variables[m.from_user.id]['adjustment_flag']:
+        variables[m.from_user.id]['lst_time'] = DBMS.execute_read_query(connection, DBMS.select_time_begin_week_for_change + str(variables[m.from_user.id]['lesson_id']))
+    else:
+        variables[m.from_user.id]['lst_time'] = DBMS.execute_read_query(connection, DBMS.select_time_begin_for_change + str(variables[m.from_user.id]['lesson_id']))
     
+
     if int(m.text.strip()[:2] + m.text.strip()[3:]) - variables[m.from_user.id]['lst_time'][0][0] >= 0:
-        DBMS.execute_query(connection, DBMS.update_time_end0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_end1 + str(variables[m.from_user.id]['lesson_id']))
+        if variables[m.from_user.id]['adjustment_flag']:
+            DBMS.execute_query(connection, DBMS.update_time_end_week0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_end1 + str(variables[m.from_user.id]['lesson_id']))
+        else:
+            DBMS.execute_query(connection, DBMS.update_time_end0 + m.text.strip()[:2] + m.text.strip()[3:] + DBMS.update_time_end1 + str(variables[m.from_user.id]['lesson_id']))
     
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         variables[m.from_user.id]['lst_of_but'] = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Общая корректировка", "Отмена"]
@@ -524,8 +553,13 @@ def change_area(m):
             if variables[m.from_user.id]['lst_areas'][i][1] == m.text.strip():
                 variables[m.from_user.id]['area_id'] = variables[m.from_user.id]['lst_areas'][i][0]
         
-        DBMS.execute_query(connection, DBMS.update_area_id0 + str(variables[m.from_user.id]['area_id']) + DBMS.update_area_id1 + str(variables[m.from_user.id]['lesson_id']))
+
+        if variables[m.from_user.id]['adjustment_flag']:
+            DBMS.execute_query(connection, DBMS.update_area_id_week0 + str(variables[m.from_user.id]['area_id']) + DBMS.update_area_id1 + str(variables[m.from_user.id]['lesson_id']))
+        else: 
+            DBMS.execute_query(connection, DBMS.update_area_id0 + str(variables[m.from_user.id]['area_id']) + DBMS.update_area_id1 + str(variables[m.from_user.id]['lesson_id']))
     
+
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         variables[m.from_user.id]['lst_of_but'] = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Общая корректировка", "Отмена"]
         for i in variables[m.from_user.id]['lst_of_but']:
@@ -569,8 +603,13 @@ def change_teacher(m):
             if variables[m.from_user.id]['lst_teachers'][i][2] == m.text.strip():
                 variables[m.from_user.id]['teacher_id'] = variables[m.from_user.id]['lst_teachers'][i][0]
         
-        DBMS.execute_query(connection, DBMS.update_teacher_id0 + str(variables[m.from_user.id]['teacher_id']) + DBMS.update_teacher_id1 + str(variables[m.from_user.id]['lesson_id']))
-    
+
+        if variables[m.from_user.id]['adjustment_flag']:
+            DBMS.execute_query(connection, DBMS.update_teacher_id_week0 + str(variables[m.from_user.id]['teacher_id']) + DBMS.update_teacher_id1 + str(variables[m.from_user.id]['lesson_id']))
+        else: 
+            DBMS.execute_query(connection, DBMS.update_teacher_id0 + str(variables[m.from_user.id]['teacher_id']) + DBMS.update_teacher_id1 + str(variables[m.from_user.id]['lesson_id']))
+
+
         markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
         variables[m.from_user.id]['lst_of_but'] = ["Расписание", "Корректировать", "Неотмеченные", "Выложить расписание", "Общая корректировка", "Отмена"]
         for i in variables[m.from_user.id]['lst_of_but']:

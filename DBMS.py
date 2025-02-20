@@ -55,7 +55,10 @@ def add_information_in_table(connection, info):
 
 
 
-delete = "DELETE FROM teachers"
+delete = "DELETE FROM lessons_week"
+
+
+clean_lessons_week_table = "DELETE FROM lessons_week"
 
 
 
@@ -324,13 +327,29 @@ WHERE
 """
 
 
+select_lessons_week_in_day = """
+SELECT
+  lessons_week.time_begin, lessons_week.time_end, teachers.tg_nick, areas.title, type_lesson.title
+FROM 
+  lessons_week 
+INNER JOIN 
+  teachers ON lessons_week.teacher_id = teachers.id
+INNER JOIN 
+  areas ON lessons_week.area_id = areas.id
+INNER JOIN 
+  type_lesson ON lessons_week.lesson_id = type_lesson.id
+WHERE 
+  lessons_week.day_of_week_num = 
+"""
+
+
 select_day_of_week_for_post = """
 SELECT
-  lessons.day_of_week_txt
+  lessons_week.day_of_week_txt
 FROM 
-  lessons
+  lessons_week
 WHERE 
-  lessons.day_of_week_num = 
+  lessons_week.day_of_week_num = 
 """
 
 
@@ -350,6 +369,22 @@ WHERE
 """
 
 
+select_lessons_week_for_change = """
+SELECT
+  lessons_week.id, lessons_week.time_begin, lessons_week.time_end, teachers.tg_nick, areas.title, type_lesson.title
+FROM 
+  lessons_week 
+INNER JOIN 
+  teachers ON lessons_week.teacher_id = teachers.id
+INNER JOIN 
+  areas ON lessons_week.area_id = areas.id
+INNER JOIN 
+  type_lesson ON lessons_week.lesson_id = type_lesson.id
+WHERE 
+  lessons_week.day_of_week_txt = 
+"""
+
+
 select_time_begin_for_change = """
 SELECT
   time_begin
@@ -360,11 +395,31 @@ WHERE
 """
 
 
+select_time_begin_week_for_change = """
+SELECT
+  time_begin
+FROM 
+  lessons_week 
+WHERE 
+  id = 
+"""
+
+
 select_time_end_for_change = """
 SELECT
   time_end
 FROM 
   lessons 
+WHERE 
+  id = 
+"""
+
+
+select_time_end_week_for_change = """
+SELECT
+  time_end
+FROM 
+  lessons_week
 WHERE 
   id = 
 """
@@ -386,10 +441,25 @@ FROM
 """
 
 
+select_lesson_for_drop = """
+SELECT
+  id, day_of_week_num, day_of_week_txt, time_begin, time_end, teacher_id, area_id, lesson_id
+FROM 
+  lessons 
+WHERE 
+  id = 
+"""
+
+
 
 update_teacher_id0 = """
 UPDATE 
   lessons
+SET 
+  teacher_id = """ 
+update_teacher_id_week0 = """
+UPDATE 
+  lessons_week
 SET 
   teacher_id = """ 
 update_teacher_id1 = """
@@ -403,6 +473,11 @@ UPDATE
   lessons
 SET 
   time_begin = """ 
+update_time_begin_week0 = """
+UPDATE 
+  lessons_week
+SET 
+  time_begin = """ 
 update_time_begin1 = """
 WHERE 
   id = 
@@ -414,6 +489,11 @@ UPDATE
   lessons
 SET 
   time_end = """ 
+update_time_end_week0 = """
+UPDATE 
+  lessons_week
+SET 
+  time_end = """ 
 update_time_end1 = """
 WHERE 
   id = 
@@ -423,6 +503,11 @@ WHERE
 update_area_id0 = """
 UPDATE 
   lessons
+SET 
+  area_id = """ 
+update_area_id_week0 = """
+UPDATE 
+  lessons_week
 SET 
   area_id = """ 
 update_area_id1 = """
